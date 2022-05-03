@@ -3,4 +3,5 @@
 [ActualLink](https://google.com)
 
 yoyoyo
-hihihi
+hi()hi
+hi[]hi
