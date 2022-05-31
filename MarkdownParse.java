@@ -1,5 +1,4 @@
 //https://howtodoinjava.com/java/io/java-read-file-to-string-examples/
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,43 +10,48 @@ public class MarkdownParse {
         ArrayList<String> toReturn = new ArrayList<>();
         // find the next [, then find the ], then find the (, then read link upto next )
         int currentIndex = 0;
+        boolean validMarkdownLink = true;
         while(currentIndex < markdown.length()) {
-            
+            //System.out.println(validMarkdownLink);
+            int imageMarker = markdown.indexOf("!",currentIndex);
             int openBracket = markdown.indexOf("[", currentIndex);
             int closeBracket = markdown.indexOf("]", openBracket);
             int openParen = markdown.indexOf("(", closeBracket);
-            if (openParen == -1 || closeBracket == -1 || openBracket == -1) {
+            int closeParen = markdown.indexOf(")", openParen);
+            if(closeParen-openParen==-1)
+            {
+                validMarkdownLink=false;
+                //System.out.println("link is empty");
+                currentIndex = closeParen + 1;
+                continue;
+            }
+            else if(openBracket==-1||openParen==-1||closeBracket==-1||closeParen==-1)
+            {
                 break;
             }
-            if (closeBracket != markdown.length() - 1 && markdown.substring(closeBracket + 1, closeBracket + 2).equals("[")) {
-                openBracket = closeBracket + 1;
-                closeBracket = markdown.indexOf("]", openBracket);
+            else if(imageMarker==openBracket-1&& imageMarker!=-1)
+            {
+                validMarkdownLink=false;
             }
-            int countOpenBracket = 1;
-            int closeParen = -1;
-            for (int i = openParen + 1; i < markdown.length(); i ++) {
-                if(markdown.substring(i, i+1).equals("(")) {
-                    countOpenBracket ++;
-                } else if (markdown.substring(i, i+1).equals(")")) {
-                    countOpenBracket --;
-                } 
-                if (countOpenBracket == 0) {
-                    closeParen = i;
-                    break;
-                }
+            if(openParen-closeBracket!=1||closeParen-openParen==1){
+                validMarkdownLink=false;
+                //System.out.println("incorrect link syntax");
+                //second portion tests empty link
+                currentIndex=openParen+1;
+                continue;  
             }
-            String beforeOpenBracket = "";
-            if (openBracket != 0) {
-                beforeOpenBracket = markdown.substring(openBracket - 1, openBracket);
-            }
-            if (!beforeOpenBracket.equals("!") && (closeBracket == openParen - 1) && (closeBracket != openBracket + 1)) {
+            if(validMarkdownLink==true)
+            {
+                //System.out.println("found");
                 toReturn.add(markdown.substring(openParen + 1, closeParen));
             }
             currentIndex = closeParen + 1;
+            validMarkdownLink=true;
         }
-
         return toReturn;
+        // new comment
     }
+
 
     public static void main(String[] args) throws IOException {
         Path fileName = Path.of(args[0]);
